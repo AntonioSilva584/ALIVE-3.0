@@ -11,6 +11,9 @@ void Init_BLE_Server()
     // Create the BLE Device
     BLEDevice::init("Dongle OBD");
 
+    //Configura o MTU máximo (512 bytes)
+    BLEDevice::setMTU(512);
+
     // Create the BLE Server
     pServer = BLEDevice::createServer();
     pServer->setCallbacks(new ServerCallbacks());
