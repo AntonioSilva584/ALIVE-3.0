@@ -49,18 +49,19 @@ void setup()
   start_module_device();
 
   /* Create the task responsible to the Acquisition(CAN + Accelerometer + GPS) */
-  xTaskCreatePinnedToCore(CANprocess_Task, "CANstatemachine", 2048, NULL, 4, &CANtask, 1);
-  xTaskCreatePinnedToCore(ModulesProcess_Task, "Modulesstatemachine", 2048, NULL, 3, &Modulestask, 1);
+  //xTaskCreatePinnedToCore(CANprocess_Task, "CANstatemachine", 2048, NULL, 4, &CANtask, 1);
+  //xTaskCreatePinnedToCore(ModulesProcess_Task, "Modulesstatemachine", 2048, NULL, 3, &Modulestask, 1);
 
   /* Create the task responsible to the Connectivity(BLE) management */
-  xTaskCreatePinnedToCore(BLEsenderData, "BLEstatemachine", 4096, NULL, 1, &BLEtask, 0);
+  //xTaskCreatePinnedToCore(BLEsenderData, "BLEstatemachine", 4096, NULL, 1, &BLEtask, 0);
 
   /* Create the task responsible to the Connectivity(ESPNOW) management */
-  xTaskCreatePinnedToCore(TaskESPNow, "ESPNowTask", 4096, NULL, 1, NULL, 0);
+  //xTaskCreatePinnedToCore(TaskESPNow, "ESPNowTask", 4096, NULL, 1, NULL, 0);
 
   /* Create the task responsible to the Connectivity(ESPNOW) management */
-  xTaskCreatePinnedToCore(SDcard_Task, "SDcardTask", 4096, NULL, 3, &SDcardtask, 1);
+  xTaskCreatePinnedToCore(SDcard_Task, "SDcardTask", 8192, NULL, 3, &SDcardtask, 1);
 
+  
 }
 
 void loop() { reset_rtc_wdt(); }
@@ -135,13 +136,13 @@ void SDcard_Task(void *arg){
 
   uint8_t _sd = FAIL_RESPONSE;       // flag to check if SD module compile
 
-  _sd = start_SD_device();
+  _sd = start_SD_device(packet);
 
   for (;;) {
     
-     Check_SD_for_storage();
+     Check_SD_for_storage(packet);
     
-    vTaskDelay(1000 / portTICK_PERIOD_MS);  // Pequeno delay para não ocupar toda a CPU
+    vTaskDelay(MAX_BLE_DELAY + 10);
   }
 
 }
