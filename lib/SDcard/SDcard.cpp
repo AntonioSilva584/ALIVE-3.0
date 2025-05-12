@@ -1,4 +1,5 @@
 #include"SDcard.h"
+#include"Definitions/Globals.h"
 
 // Define timeout time in milliseconds,0 (example: 2000ms = 2s)
 const long timeoutTime = 3000;
@@ -8,13 +9,12 @@ File dataFile;
 
 /* Debug Variables */
 boolean savingBlink = false;
-boolean saveFlag = false;
 
 uint8_t start_SD_device(BLE_packet_t msg_packet)
-{
+{ /*
   do
   { Serial.println("Mount SD..."); } while (!sdConfig() && millis() < timeoutTime);
-
+*/
   if (!mounted)
   {
     Serial.println("SD mounted error!!");
@@ -25,7 +25,7 @@ uint8_t start_SD_device(BLE_packet_t msg_packet)
     Serial.println("SD mounted!!");
 
   }
-  sdSave(true, msg_packet);
+  //sdSave(true, msg_packet);
   setup_SD_ticker();
 
   return SUCESS_RESPONSE;
@@ -67,7 +67,7 @@ int countFiles(File dir)
   return fileCountOnSD - 1;
 }
 
-uint8_t sdSave(bool set, BLE_packet_t msg_packet)
+uint8_t sdSave(bool set, BLE_packet_t packet)
 {
   uint8_t check_sd = FAIL_RESPONSE;
 
@@ -75,7 +75,7 @@ uint8_t sdSave(bool set, BLE_packet_t msg_packet)
 
   if (dataFile)
   {
-    dataFile.println(packetToString(set,msg_packet));
+    dataFile.println(packetToString(set, packet));
     dataFile.close();
     savingBlink = !savingBlink;
     //digitalWrite(DEBUG_LED, savingBlink);
@@ -160,6 +160,15 @@ String packetToString(bool err, BLE_packet_t msg_packet)
 
   else
   {
+    /*
+    dataString += "FUNCIONA";
+    dataString += ",";
+    dataString += "DESGRAÇA";
+    dataString += ",";
+    */
+    Serial.println("GRAVANDO DADOS");
+
+    
     dataString += String((msg_packet.Calculated_Engine_Load));
     dataString += ",";
     dataString += String((msg_packet.Engine_Coolant_Temperature));
@@ -202,7 +211,7 @@ String packetToString(bool err, BLE_packet_t msg_packet)
     dataString += ",";
     dataString += String((msg_packet.imu_acc.ang_x));
     */
-
+    /*
     dataString += ",";
     dataString += String((msg_packet.gps_data.LAT));
     dataString += ",";    
@@ -210,23 +219,26 @@ String packetToString(bool err, BLE_packet_t msg_packet)
     /*
     dataString += ",";
     dataString += String((msg_packet.imu_acc.acctemp));
-    */
+    
     
     dataString += ",";
     dataString += String((msg_packet.DTC));
+    */
+
+    
    
   }
 
   return dataString;
 }
 
-uint8_t Check_SD_for_storage(BLE_packet_t msg_packet)
+uint8_t Check_SD_for_storage(BLE_packet_t packet)
 {
   static uint8_t sd_status = FAIL_RESPONSE;
 
   if (saveFlag && mounted)
   {
-    sd_status = sdSave(false, msg_packet);
+    sd_status = sdSave(false,packet);
     saveFlag = false;
   }
 

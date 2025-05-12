@@ -15,10 +15,14 @@
 #include<ESPNOW.h>
 
 #include <SDcard.h>
+#include <Definitions/Globals.h>
 
 BLE_packet_t packet;
 TaskHandle_t CANtask = NULL, Modulestask = NULL, BLEtask = NULL, SDcardtask = NULL;
 
+bool saveFlag = false; 
+
+SemaphoreHandle_t spiMutex; // Semáforo para controlar o SPI
 /* Taks */
 void CANprocess_Task(void *arg);
 void ModulesProcess_Task(void *arg);
@@ -30,6 +34,7 @@ void setup()
 {
   Serial.begin(115200);
   Serial.println("\r\nINICIANDO ALIVE 3.0\r\n");
+  spiMutex = xSemaphoreCreateMutex(); // Cria o semáforo
 
   ESPNOW_Setup();
 
@@ -37,8 +42,10 @@ void setup()
   packet.DTC = "null";
 
   /* Start the MCP2515 to CAN communication */
+if (xSemaphoreTake(spiMutex, portMAX_DELAY)) {
   start_CAN_device();
-
+  xSemaphoreGive(spiMutex);
+}
   /* Set the new WDT timer */
   set_wdt_timer();
 
@@ -49,7 +56,7 @@ void setup()
   start_module_device();
 
   /* Create the task responsible to the Acquisition(CAN + Accelerometer + GPS) */
-  //xTaskCreatePinnedToCore(CANprocess_Task, "CANstatemachine", 2048, NULL, 4, &CANtask, 1);
+  xTaskCreatePinnedToCore(CANprocess_Task, "CANstatemachine", 10000, NULL, 4, &CANtask, 1);
   //xTaskCreatePinnedToCore(ModulesProcess_Task, "Modulesstatemachine", 2048, NULL, 3, &Modulestask, 1);
 
   /* Create the task responsible to the Connectivity(BLE) management */
@@ -59,7 +66,7 @@ void setup()
   //xTaskCreatePinnedToCore(TaskESPNow, "ESPNowTask", 4096, NULL, 1, NULL, 0);
 
   /* Create the task responsible to the Connectivity(ESPNOW) management */
-  xTaskCreatePinnedToCore(SDcard_Task, "SDcardTask", 8192, NULL, 3, &SDcardtask, 1);
+  //xTaskCreatePinnedToCore(SDcard_Task, "SDcardTask", 8192, NULL, 4, &SDcardtask, 1);
 
   
 }
@@ -70,17 +77,35 @@ void loop() { reset_rtc_wdt(); }
 void CANprocess_Task(void *arg)
 {
   static int circularbuffer_State = IDLE_ST;
-
+  bool dataWrite = true;
   TestIF_StdExt();
   checkPID();
   init_tickers();
+  setup_SD_ticker();
+  bool status_sd = sdConfig();
 
   while (1)
   {
+    //if (xSemaphoreTake(spiMutex, portMAX_DELAY)){
+    
     circularbuffer_State = CircularBuffer_state();
 
-    if (circularbuffer_State != IDLE_ST)
-      send_OBDmsg(circularbuffer_State, &packet);
+      if (circularbuffer_State != IDLE_ST)
+        send_OBDmsg(circularbuffer_State, &packet);
+
+      if(saveFlag && status_sd){        
+        
+        if(dataWrite){
+            sdSave(true, packet);  
+         }
+         
+        Check_SD_for_storage(packet);
+        saveFlag = false;
+        dataWrite = false;
+      }
+    //xSemaphoreGive(spiMutex);
+
+    //}
 
     vTaskDelay(1);
   }
@@ -132,17 +157,21 @@ void TaskESPNow(void *pvParameters) {
 }
 
 /*Task to log data on SDcard*/
+/*
 void SDcard_Task(void *arg){
 
   uint8_t _sd = FAIL_RESPONSE;       // flag to check if SD module compile
-
+if (xSemaphoreTake(spiMutex, portMAX_DELAY)) {
   _sd = start_SD_device(packet);
+  xSemaphoreGive(spiMutex);
+}
 
   for (;;) {
-    
+    if (xSemaphoreTake(spiMutex, portMAX_DELAY)) {
      Check_SD_for_storage(packet);
-    
+     xSemaphoreGive(spiMutex);
+    }
     vTaskDelay(MAX_BLE_DELAY + 10);
   }
 
-}
+}*/

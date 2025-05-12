@@ -16,9 +16,9 @@
 uint8_t start_SD_device(BLE_packet_t msg_packet);
 bool sdConfig(void);
 int countFiles(File dir);
-uint8_t sdSave(bool set, BLE_packet_t msg_packet); 
-String packetToString(bool err, BLE_packet_t msg_packet);
-uint8_t Check_SD_for_storage(BLE_packet_t msg_packet);
+uint8_t sdSave(bool set, BLE_packet_t packet); 
+String packetToString(bool err, BLE_packet_t packet);
+uint8_t Check_SD_for_storage(BLE_packet_t packet);
 
 /* Ticker definitions */
 void setup_SD_ticker(void);
