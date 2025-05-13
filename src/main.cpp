@@ -17,8 +17,13 @@
 #include <SDcard.h>
 #include <Definitions/Globals.h>
 
+#include <Sim800L.h>
+
 BLE_packet_t packet;
 TaskHandle_t CANtask = NULL, Modulestask = NULL, BLEtask = NULL, SDcardtask = NULL;
+
+/* State Of Telemetry (SOT) variables */
+uint8_t _sot = DISCONNECTED;
 
 bool saveFlag = false; 
 
@@ -29,12 +34,15 @@ void ModulesProcess_Task(void *arg);
 void BLEsenderData(void *arg);
 void TaskESPNow(void *pvParameters);
 void SDcard_Task(void *arg);
+void GPRS_mqtt_Task(void *pvParameters);
 
 void setup()
 {
   Serial.begin(115200);
+  SerialAT.begin(115200, SERIAL_8N1, MODEM_RX, MODEM_TX);
+
   Serial.println("\r\nINICIANDO ALIVE 3.0\r\n");
-  spiMutex = xSemaphoreCreateMutex(); // Cria o semáforo
+  //spiMutex = xSemaphoreCreateMutex(); // Cria o semáforo
 
   ESPNOW_Setup();
 
@@ -42,10 +50,10 @@ void setup()
   packet.DTC = "null";
 
   /* Start the MCP2515 to CAN communication */
-if (xSemaphoreTake(spiMutex, portMAX_DELAY)) {
+//if (xSemaphoreTake(spiMutex, portMAX_DELAY)) {
   start_CAN_device();
-  xSemaphoreGive(spiMutex);
-}
+  //xSemaphoreGive(spiMutex);
+//}
   /* Set the new WDT timer */
   set_wdt_timer();
 
@@ -67,6 +75,8 @@ if (xSemaphoreTake(spiMutex, portMAX_DELAY)) {
 
   /* Create the task responsible to the Connectivity(ESPNOW) management */
   //xTaskCreatePinnedToCore(SDcard_Task, "SDcardTask", 8192, NULL, 4, &SDcardtask, 1);
+
+  xTaskCreatePinnedToCore(GPRS_mqtt_Task, "GPRSmqttTask", 4096, NULL, 5, NULL, 1);
 
   
 }
@@ -175,3 +185,23 @@ if (xSemaphoreTake(spiMutex, portMAX_DELAY)) {
   }
 
 }*/
+
+
+/* Connectivity Task */
+void GPRS_mqtt_Task(void *pvParameters)
+{
+  _sot = Initialize_GSM();
+  while (1)
+  {   
+    if (!Check_mqtt_client_conection())
+    {    
+      gsmReconnect(_sot);      
+    }    //Serial.printf("mqtt_client_connection_geral --> %d\r\n", bluetooth_packet.mqtt_client_connection);
+
+    Send_msg_MQTT(packet);
+
+    vTaskDelay(1);
+  }
+
+  vTaskDelay(1);
+}
