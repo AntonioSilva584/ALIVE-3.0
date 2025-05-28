@@ -50,12 +50,11 @@ void setup()
   packet.DTC = "null";
 
   /* Start the MCP2515 to CAN communication */
-//if (xSemaphoreTake(spiMutex, portMAX_DELAY)) {
+
   start_CAN_device();
-  //xSemaphoreGive(spiMutex);
-//}
+  
   /* Set the new WDT timer */
-  set_wdt_timer();
+  //set_wdt_timer();
 
   /* Init the BLE host connection */
   Init_BLE_Server();
@@ -68,7 +67,7 @@ void setup()
   //xTaskCreatePinnedToCore(ModulesProcess_Task, "Modulesstatemachine", 2048, NULL, 3, &Modulestask, 1);
 
   /* Create the task responsible to the Connectivity(BLE) management */
-  //xTaskCreatePinnedToCore(BLEsenderData, "BLEstatemachine", 4096, NULL, 1, &BLEtask, 0);
+  xTaskCreatePinnedToCore(BLEsenderData, "BLEstatemachine", 4096, NULL, 1, &BLEtask, 0);
 
   /* Create the task responsible to the Connectivity(ESPNOW) management */
   //xTaskCreatePinnedToCore(TaskESPNow, "ESPNowTask", 4096, NULL, 1, NULL, 0);
@@ -103,6 +102,7 @@ void CANprocess_Task(void *arg)
       if (circularbuffer_State != IDLE_ST)
         send_OBDmsg(circularbuffer_State, &packet);
 
+
       if(saveFlag && status_sd){        
         
         if(dataWrite){
@@ -116,7 +116,9 @@ void CANprocess_Task(void *arg)
     //xSemaphoreGive(spiMutex);
 
     //}
-
+      
+        packet.gps_data.LAT = -8.055810;
+        packet.gps_data.LNG = -34.951691;
     vTaskDelay(1);
   }
 }
@@ -200,7 +202,7 @@ void GPRS_mqtt_Task(void *pvParameters)
 
     Send_msg_MQTT(packet);
 
-    vTaskDelay(1);
+    vTaskDelay(500);
   }
 
   vTaskDelay(1);
