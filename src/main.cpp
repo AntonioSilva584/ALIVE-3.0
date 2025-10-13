@@ -67,7 +67,7 @@ void setup()
   //xTaskCreatePinnedToCore(ModulesProcess_Task, "Modulesstatemachine", 2048, NULL, 3, &Modulestask, 1);
 
   /* Create the task responsible to the Connectivity(BLE) management */
-  xTaskCreatePinnedToCore(BLEsenderData, "BLEstatemachine", 4096, NULL, 1, &BLEtask, 0);
+  //xTaskCreatePinnedToCore(BLEsenderData, "BLEstatemachine", 4096, NULL, 1, &BLEtask, 0);
 
   /* Create the task responsible to the Connectivity(ESPNOW) management */
   //xTaskCreatePinnedToCore(TaskESPNow, "ESPNowTask", 4096, NULL, 1, NULL, 0);

@@ -210,17 +210,17 @@ void publishPacket(BLE_packet_t msg_packet)
     doc["Ambient_Temperature"]    = verify_message_is_null(AmbientAirTemperature, msg_packet.Ambient_Air_Temperature);
     doc["Engine_Oil_Temperature"] = verify_message_is_null(EngineOilTemperature, msg_packet.Engine_Oil_Temperature);
     doc["Engine_fuel_rate"]       = verify_message_is_null(EngineFuelRate, msg_packet.Engine_fuel_rate);
-    doc["Odometer"]               = verify_message_is_null(Odometer_PID, msg_packet.Odometer);
-    doc["Acc_X"]               = verify_message_is_null(Accelerometer_ST, msg_packet.imu_acc.acc_x);
-    doc["Acc_Y"]                  = verify_message_is_null(Accelerometer_ST, msg_packet.imu_acc.acc_y);
-    doc["Acc_Z"]                  = verify_message_is_null(Accelerometer_ST, msg_packet.imu_acc.acc_z);
+    //doc["Odometer"]               = verify_message_is_null(Odometer_PID, msg_packet.Odometer);
+    //doc["Acc_X"]               = verify_message_is_null(Accelerometer_ST, msg_packet.imu_acc.acc_x);
+    //doc["Acc_Y"]                  = verify_message_is_null(Accelerometer_ST, msg_packet.imu_acc.acc_y);
+    //doc["Acc_Z"]                  = verify_message_is_null(Accelerometer_ST, msg_packet.imu_acc.acc_z);
     //doc["Ang_X"]            = verify_message_is_null(Accelerometer_ST, msg_packet.imu_ang.ang_x);
     //doc["Ang_Y"]               = verify_message_is_null(Accelerometer_ST, msg_packet.imu_ang.ang_y);
     //doc["Ang_Z"]              = verify_message_is_null(Accelerometer_ST, msg_packet.imu_ang.ang_z);
-    doc["Latitude"] = verify_message_is_null(GPS_ST, msg_packet.gps_data.LAT);
-    doc["Longitude"] = verify_message_is_null(GPS_ST, msg_packet.gps_data.LNG);
+    //doc["Latitude"] = verify_message_is_null(GPS_ST, msg_packet.gps_data.LAT);
+    //doc["Longitude"] = verify_message_is_null(GPS_ST, msg_packet.gps_data.LNG);
     //doc["Temp_Intern"]              = verify_message_is_null(Accelerometer_ST, msg_packet.acctemp);    
-    doc["DTC"]                    = msg_packet.DTC;
+    //doc["DTC"]                    = msg_packet.DTC;
 
     // doc["x04"]  = verify_message_is_null(EngineLoad, msg_packet.Calculated_Engine_Load);
     // doc["x05"]  = verify_message_is_null(EngineCollantTemp, msg_packet.Engine_Coolant_Temperature);
