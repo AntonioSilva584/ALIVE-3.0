@@ -29,7 +29,8 @@ void Init_BLE_Server()
     pCharacteristic = pService->createCharacteristic( \
         CHARACTERISTIC_UUID,                          \
         BLECharacteristic::PROPERTY_NOTIFY |          \
-        BLECharacteristic::PROPERTY_WRITE             \
+        BLECharacteristic::PROPERTY_WRITE |
+        BLECharacteristic::PROPERTY_READ              
         );
 
     // Create a BLE Descriptor
