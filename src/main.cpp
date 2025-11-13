@@ -40,6 +40,7 @@ void setup()
 {
   Serial.begin(115200);
   SerialAT.begin(115200, SERIAL_8N1, MODEM_RX, MODEM_TX);
+  SerialGPS.begin(GPSBaudRate, SERIAL_8N1, GPIO_NUM_33, GPIO_NUM_32);
 
   Serial.println("\r\nINICIANDO ALIVE 3.0\r\n");
   //spiMutex = xSemaphoreCreateMutex(); // Cria o semáforo
@@ -63,11 +64,11 @@ void setup()
   start_module_device();
 
   /* Create the task responsible to the Acquisition(CAN + Accelerometer + GPS) */
-  xTaskCreatePinnedToCore(CANprocess_Task, "CANstatemachine", 10000, NULL, 4, &CANtask, 1);
-  //xTaskCreatePinnedToCore(ModulesProcess_Task, "Modulesstatemachine", 2048, NULL, 3, &Modulestask, 1);
+ // xTaskCreatePinnedToCore(CANprocess_Task, "CANstatemachine", 10000, NULL, 4, &CANtask, 1);
+  xTaskCreatePinnedToCore(ModulesProcess_Task, "Modulesstatemachine", 2048, NULL, 3, &Modulestask, 1);
 
   /* Create the task responsible to the Connectivity(BLE) management */
-  xTaskCreatePinnedToCore(BLEsenderData, "BLEstatemachine", 4096, NULL, 1, &BLEtask, 0);
+  //xTaskCreatePinnedToCore(BLEsenderData, "BLEstatemachine", 4096, NULL, 1, &BLEtask, 0);
 
   /* Create the task responsible to the Connectivity(ESPNOW) management */
   //xTaskCreatePinnedToCore(TaskESPNow, "ESPNowTask", 4096, NULL, 1, NULL, 0);
@@ -117,8 +118,8 @@ void CANprocess_Task(void *arg)
 
     //}
       
-        packet.gps_data.LAT = -8.055810;
-        packet.gps_data.LNG = -34.951691;
+        //packet.gps_data.LAT = -8.062597;
+        //packet.gps_data.LNG = -34.873058 ;
     vTaskDelay(1);
   }
 }
@@ -126,7 +127,7 @@ void CANprocess_Task(void *arg)
 void ModulesProcess_Task(void *arg)
 {
   static uint8_t gps_counter_per_seconds = 0;     // Each second will be incremented
-  const static uint8_t Time_to_get_gps_data = 30; // Expected time to get/update the gps data (in seconds)
+  const static uint8_t Time_to_get_gps_data = 10; // Expected time to get/update the gps data (in seconds)
 
   while (1)
   {

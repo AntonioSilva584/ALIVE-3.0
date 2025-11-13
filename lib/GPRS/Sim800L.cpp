@@ -70,7 +70,7 @@ uint8_t Initialize_GSM()
   }
 
   Serial.print("Waiting for network...");
-  if (!modem.waitForNetwork(15000L))
+  if (!modem.waitForNetwork(25000L))
   {
     Serial.println("fail");
     return (uint8_t)ERROR_CONECTION;

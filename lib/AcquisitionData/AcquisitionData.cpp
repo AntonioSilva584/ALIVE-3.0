@@ -8,12 +8,11 @@ bool init_ACC = false;
 
 /* Debug Variables */
 //#define debug_acc             // Print on Serial  paramenters
-//#define debug_GPS             // Print on Serial the paramenters
+#define debug_GPS             // Print on Serial the paramenters
 
 void start_module_device()
 {
   // Init the gps serial communication with GPS module
-  SerialGPS.begin(GPSBaudRate);
 
   // Init the MPU
   Wire.begin();
@@ -87,15 +86,19 @@ void gps_acq_function(BLE_packet_t *packet)
   {
     // This ensures that the gps object is being "fed".
     while (SerialGPS.available() > 0)
-      NEO_M8N.encode(SerialGPS.read());
+    {
+      char u = SerialGPS.read();
+      NEO_M8N.encode(u);
+      printf("%c", u);
+    }
 
     if (NEO_M8N.satellites.isValid() && NEO_M8N.location.isValid())
     {
-      // packet->gps_data.LAT = NEO_M8N.location.lat();
-      // packet->gps_data.LNG = NEO_M8N.location.lng();
+       packet->gps_data.LAT = NEO_M8N.location.lat();
+      packet->gps_data.LNG = NEO_M8N.location.lng();
 
-      packet->gps_data.LAT = -8.055810;
-      packet->gps_data.LNG = -34.951691;
+      //packet->gps_data.LAT = -8.055810;
+      //packet->gps_data.LNG = -34.951691;
 
       #ifdef debug_GPS
         Serial.printf("Satellites: %d\r\n", NEO_M8N.satellites.value());

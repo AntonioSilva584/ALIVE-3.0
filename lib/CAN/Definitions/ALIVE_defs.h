@@ -6,7 +6,7 @@
 #include "CAN_PIDs.h"
 
 /*====================== CAN DEFINITIONS ============================ */
-#define SerialGPS           Serial2
+#define SerialGPS           Serial1
 
 #define BUFFER_SIZE         200
 #define CAN_ID_EXTENDED     0x18DB33F1
